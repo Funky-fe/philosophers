@@ -24,6 +24,7 @@ t_philo	*init_philos(int ac, char **av)
 			philo[i].max_eat = -1;
 		i++;
 	}
+	init_forks(philo, num_philo, -1);
 	return (philo);
 }
 
@@ -49,10 +50,34 @@ t_philo	*init_forks(t_philo *philo, int num_plilo, int i)
 		}
 	}
 	i = -1;
+	init_threads(philo, num_plilo, -1);
 	while(++i < num_plilo)
 		pthread_mutex_destroy(&forks[i]);
 	free(forks);
 	return (philo);
+}
+
+int	init_threads(t_philo *philo, int num_philo, int i)
+{
+	pthread_t	*thread;
+	t_info		info;
+
+	pthread_mutex_init(&info.print, NULL);
+	info.t_start = get_time(0);
+	info.death_occurred = 0;
+	info.max_eats = 0;
+	info.num_philo = num_philo;
+	thread = (pthread_t *)malloc(sizeof(pthread_t) * num_philo);
+	while (++i < num_philo)
+	{
+		philo[i].info = &info;
+		philo[i].t_start = info.t_start;
+		if (pthread_create(&thread[i], NULL,  &philo[i]) != 0)
+			return (1);
+	}
+	philo_checker(philo, num_philo);
+	i = -1;
+	while 
 }
 int	args_valid(int ac, char **av)
 {

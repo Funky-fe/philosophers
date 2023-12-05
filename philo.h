@@ -36,9 +36,18 @@ typedef struct s_philo
 }			t_philo;
 
 /*		INIT		*/
-t_philo	*init_philos(int ac, char **av);
-int		args_valid(int ac, char **av);
+t_philo			*init_philos(int ac, char **av);
+t_philo			*init_forks(t_philo *philo, int num_plilo, int i);
+int				args_valid(int ac, char **av);
 
 /*		UTILS		*/
-long	ft_atol(char *str);
+long			ft_atol(char *str);
+void			philo_checker(t_philo *philo, int num_philo);
+unsigned long	get_time(unsigned long t_start);
+int				check_nbr_eats(t_philo *philo);
+int				should_philo_die(t_philo *philo);
+
+/*		UTILS 2		*/
+void			philo_print(t_philo *philo, const char *str);
+
 #endif
