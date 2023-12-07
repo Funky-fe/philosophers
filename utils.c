@@ -6,7 +6,7 @@
 /*   By: rlima-fe <rlima-fe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/27 18:25:33 by rlima-fe          #+#    #+#             */
-/*   Updated: 2023/12/05 14:15:03 by rlima-fe         ###   ########.fr       */
+/*   Updated: 2023/12/07 17:49:20 by rlima-fe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,7 @@ void	philo_checker(t_philo *philo, int num_philo)
 	while (1 && !death && !max_eat)
 	{
 		i = 0;
-		while (1 < num_philo)
+		while (i < num_philo)
 		{
 			if (should_philo_die(&philo[i]))
 				death = 1;
@@ -84,7 +84,7 @@ int	should_philo_die(t_philo *philo)
 	int	last_ate;
 
 	pthread_mutex_lock(&philo->info->print);
-	last_ate = get_time(philo->t_start - philo->last_meal);
+	last_ate = get_time(philo->t_start) - philo->last_meal;
 	pthread_mutex_unlock(&philo->info->print);
 	if (last_ate >= philo->time_to_die)
 	{

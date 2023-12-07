@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   init.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: rlima-fe <rlima-fe@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/12/07 15:47:48 by rlima-fe          #+#    #+#             */
+/*   Updated: 2023/12/07 17:18:54 by rlima-fe         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "philo.h"
 
 t_philo	*init_philos(int ac, char **av)
@@ -7,19 +19,19 @@ t_philo	*init_philos(int ac, char **av)
 	int		num_philo;
 
 	i = 0;
-	num_philo = ft_atoi(av[1]);
+	num_philo = ft_atol(av[1]);
 	philo = (t_philo *)malloc(sizeof(t_philo) * num_philo);
 	philo->is_dead = 0;
 	while (i < num_philo)
 	{
 		philo[i].id = i + 1;
-		philo[i].time_to_die = ft_atoi(av[2]);
-		philo[i].time_to_eat = ft_atoi(av[3]);
-		philo[i].time_to_sleep = ft_atoi(av[4]);
+		philo[i].time_to_die = ft_atol(av[2]);
+		philo[i].time_to_eat = ft_atol(av[3]);
+		philo[i].time_to_sleep = ft_atol(av[4]);
 		philo[i].eat_count = 0;
 		philo[i].last_meal = 0;
 		if (ac == 6)
-			philo[i].max_eat = ft_atoi(av[5]);
+			philo[i].max_eat = ft_atol(av[5]);
 		else
 			philo[i].max_eat = -1;
 		i++;
@@ -72,13 +84,20 @@ int	init_threads(t_philo *philo, int num_philo, int i)
 	{
 		philo[i].info = &info;
 		philo[i].t_start = info.t_start;
-		if (pthread_create(&thread[i], NULL,  &philo[i]) != 0)
+		if (pthread_create(&thread[i], NULL, thread_function, &philo[i]) != 0)
 			return (1);
 	}
 	philo_checker(philo, num_philo);
 	i = -1;
-	while 
+	while (++i < num_philo)
+	{
+		if (pthread_join(thread[i], NULL) != 0)
+			return (1);
+	}
+	free (thread);
+	return (1);
 }
+
 int	args_valid(int ac, char **av)
 {
 	int	i;
@@ -86,21 +105,20 @@ int	args_valid(int ac, char **av)
 
 	i = 1;
 	if (ac < 5 || ac > 6)
-		return (0);
-	while (i < ac)
 	{
+		printf("Number of arguments must be 4 or 5\n");
+		return (0);
+	}
+	while (av[i])
+	{
+		if (ft_atol(av[i]) == 666966696669)
+			return (0);
 		j = 0;
-		while (av[i])
+		while (av[i][j])
 		{
-			if (atol(av[i]) == 666966696669)
+			if (av[i][j] < '0' || av[i][j] > '9')
 				return (0);
-			j = 0;
-			while (av[i][j])
-			{
-				if (av[i][j] < '0' || av[i][j] > '9')
-					return (0);
-				j++;
-			}
+			j++;
 		}
 		i++;
 	}

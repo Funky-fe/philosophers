@@ -1,18 +1,30 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: rlima-fe <rlima-fe@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/12/07 15:47:51 by rlima-fe          #+#    #+#             */
+/*   Updated: 2023/12/07 17:54:02 by rlima-fe         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "philo.h"
 
 void	pick_forks(t_philo *philo)
 {
-	pthread_t fork1;
-	pthread_t fork2;
+	pthread_mutex_t *fork1;
+	pthread_mutex_t *fork2;
 
 	fork1 = philo->left_fork;
 	fork2 = philo->right_fork;
 	pthread_mutex_lock(fork1);
-	print_state(philo, "has taken a fork");
+	philo_print(philo, "has taken a fork");
 	if (philo->info->num_philo == 1)
 		return ;
 	pthread_mutex_lock(fork2);
-	print_state(philo, "has taken a fork");
+	philo_print(philo, "has taken a fork");
 	pthread_mutex_lock(&philo->info->print);
 	philo->last_meal = get_time(philo->info->t_start);
 	philo->eat_count++;
@@ -21,16 +33,14 @@ void	pick_forks(t_philo *philo)
 
 void	eat_start(t_philo *philo)
 {
-	pthread_mutex_lock(&philo->info->print);
-	philo_print(philo->id, "is eating");
-	pthread_mutex_unlock(&philo->info->print);
+	philo_print(philo, "is eating");
 	usleep(philo->time_to_sleep * 1000);
 	pthread_mutex_unlock(philo->left_fork);
 	pthread_mutex_unlock(philo->right_fork);
 	usleep(500);
 }
 
-void	thread_function(void *arg)
+void	*thread_function(void *arg)
 {
 	t_philo	*philo;
 
@@ -47,9 +57,10 @@ void	thread_function(void *arg)
 			pthread_mutex_unlock(&philo->info->print);
 			break;
 		}
-		philo_print(philo->id, "is sleeping");
+		pthread_mutex_unlock(&philo->info->print);
+		philo_print(philo, "is sleeping");
 		usleep(philo->time_to_sleep * 1000);
-		philo_print(philo->id, "is thinking");
+		philo_print(philo, "is thinking");
 	}
 	return (NULL);
 }
@@ -58,8 +69,8 @@ int	main(int ac, char **av)
 {
 	t_philo	*philo;
 
-	if (!args_valid(ac, av));
-		return (1);
+	if (!args_valid(ac, av))
+		return (1);	
 	philo = init_philos(ac, av);
-	return (0);
+	free (philo);
 }

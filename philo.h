@@ -35,9 +35,15 @@ typedef struct s_philo
 	t_info			*info;
 }			t_philo;
 
+/*		MAIN		*/
+void			pick_forks(t_philo *philo);
+void			eat_start(t_philo *philo);
+void			*thread_function(void *arg);
+
 /*		INIT		*/
 t_philo			*init_philos(int ac, char **av);
 t_philo			*init_forks(t_philo *philo, int num_plilo, int i);
+int				init_threads(t_philo *philo, int num_philo, int i);
 int				args_valid(int ac, char **av);
 
 /*		UTILS		*/
