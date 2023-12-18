@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   philo.h                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: rlima-fe <rlima-fe@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/12/08 17:16:09 by rlima-fe          #+#    #+#             */
+/*   Updated: 2023/12/18 14:32:25 by rlima-fe         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef PHILO_H
 # define PHILO_H
 
@@ -9,51 +21,68 @@
 # include <unistd.h>
 # include <limits.h>
 
-typedef struct s_info
+typedef struct s_stats
 {
-	unsigned long	t_start;
-	pthread_mutex_t	print;
-	int				death_occurred;
-	int				max_eats;
-	int				num_philo;
-}				t_info;
+	int						philos;
+	int						time_to_die;
+	int						time_to_eat;
+	int						time_to_sleep;
+	int						meals;
+	int						number_philos_ate;
+	int						stop;
+	long int				start_t;
+	pthread_mutex_t			write_mutex;
+	pthread_mutex_t			dead_mutex;
+	pthread_mutex_t			time_eat_mutex;
+	pthread_mutex_t			finish_mutex;
+}							t_stats;
 
 typedef struct s_philo
 {
-	int				id;
-	int				time_to_die;
-	int				time_to_eat;
-	int				time_to_sleep;
-	int				eat_count;
-	int				last_meal;
-	int				max_eat;
-	int				is_dead;
-	unsigned long	t_start;
-	pthread_mutex_t	*left_fork;
-	pthread_mutex_t	*right_fork;
-	pthread_mutex_t	*print;
-	t_info			*info;
-}			t_philo;
+	int						id;
+	int						finish;
+	long int				ms_eat;
+	unsigned int			nb_philo_ate;
+	pthread_t				thread_id;
+	pthread_t				thread_death_id;
+	pthread_mutex_t			*right_fork;
+	pthread_mutex_t			left_fork;
+	t_stats					*pa;
+}							t_philo;
 
-/*		MAIN		*/
-void			pick_forks(t_philo *philo);
-void			eat_start(t_philo *philo);
-void			*thread_function(void *arg);
+typedef struct s_p
+{
+	t_philo					*ph;
+	t_stats					s;
+}							t_p;
+
+/*		ARGS		*/
+int		arg_checker(int argc, char **argv, t_p *p);
+void	arg_error();
+
+/*		CHECK		*/
+void	stop(t_p *p);
+int		check_death(t_philo *ph, int i);
 
 /*		INIT		*/
-t_philo			*init_philos(int ac, char **av);
-t_philo			*init_forks(t_philo *philo, int num_plilo, int i);
-int				init_threads(t_philo *philo, int num_philo, int i);
-int				args_valid(int ac, char **av);
+void	init_mutex(t_p *p);
+int		init(t_p *p);
+
+/*		SIMULATION		*/
+void	print_action(char *str, t_philo *ph);
+void	sleep_think(t_philo *ph);
+void	simu(t_philo *ph);
+
+/*		THREADS		*/
+void	*is_dead(void	*data);
+void	*thread(void *data);
+int		threading(t_p *p);
 
 /*		UTILS		*/
-long			ft_atol(char *str);
-void			philo_checker(t_philo *philo, int num_philo);
-unsigned long	get_time(unsigned long t_start);
-int				check_nbr_eats(t_philo *philo);
-int				should_philo_die(t_philo *philo);
-
-/*		UTILS 2		*/
-void			philo_print(t_philo *philo, const char *str);
+int		ft_strlen(char *str);
+int		ft_atoi(const char *str);
+int		is_number(char **argv, int i, int j);
+long	int	actual_time(void);
+void	ft_usleep(long int time_in_ms);
 
 #endif
