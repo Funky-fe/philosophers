@@ -14,7 +14,21 @@
 
 void	*is_dead(void *data)
 {
-	
+	t_philo	*ph;
+
+	ph = (t_philo *)data;
+	ft_usleep(ph->pa->time_to_die);
+	pthread_mutex_lock(&ph->pa->finish_mutex);
+	pthread_mutex_lock(&ph->pa->time_eat_mutex);
+	if (!check_death(ph, 0) && !ph->finish && ((actual_time()) - ph->ms_eat) \
+		< ph->pa->time_to_die)
+	{
+		pthread_mutex_unlock(&ph->pa->finish_mutex);
+		pthread_mutex_unlock(&ph->pa->time_eat_mutex);
+		pthread_mutex_lock(&ph->pa->write_mutex);
+		print_action("Died\n", ph);
+		pthread_mutex_unlock(&ph->pa->write_mutex);
+	}
 }
 
 void	*thread(void *data)
