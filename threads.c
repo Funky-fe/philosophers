@@ -26,9 +26,12 @@ void	*is_dead(void *data)
 		pthread_mutex_unlock(&ph->pa->finish_mutex);
 		pthread_mutex_unlock(&ph->pa->time_eat_mutex);
 		pthread_mutex_lock(&ph->pa->write_mutex);
-		print_action("Died\n", ph);
+		print_action("died\n", ph);
 		pthread_mutex_unlock(&ph->pa->write_mutex);
+		check_death(ph, 1);
 	}
+	pthread_mutex_unlock(&ph->pa->finish_mutex);
+	pthread_mutex_unlock(&ph->pa->time_eat_mutex);
 }
 
 void	*thread(void *data)
@@ -40,7 +43,20 @@ void	*thread(void *data)
 		ft_usleep(ph->pa->time_to_eat / 10);
 	while (!check_death(ph, 0))
 	{
+		pthread_create(&ph->thread_death_id, NULL, is_dead, data);
 		simu(ph);
+		if((int)++ph->nb_philo_ate == ph->pa->meals)
+		{
+			phtread_mutex_lock(ph->pa->finish_mutex);
+			ph->finish = 1;
+			ph->pa->number_philos_ate++;
+			if (ph->pa->number_philos_ate == ph->pa->philos)
+			{
+				pthread_mutex_unlock(&ph->pa->finish_mutex);
+				check_death(ph, 2);
+			}
+			pthread_mutex_unlock(&ph->pa->finish_mutex);
+		}
 	}
 }
 
