@@ -5,38 +5,51 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: rlima-fe <rlima-fe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/12/08 18:44:38 by rlima-fe          #+#    #+#             */
-/*   Updated: 2023/12/18 15:18:49 by rlima-fe         ###   ########.fr       */
+/*   Created: 2023/12/21 16:02:45 by rlima-fe          #+#    #+#             */
+/*   Updated: 2023/12/21 16:08:37 by rlima-fe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-void	*is_dead(void *data)
+/*
+	Checks whether a philosopher has died due to starvation, and
+	if so, prints a message indicating that the philosopher has died.
+*/
+
+void	*is_dead(void	*data)
 {
-	t_philo	*ph;
+	t_philo					*ph;
 
 	ph = (t_philo *)data;
 	ft_usleep(ph->pa->time_to_die);
-	pthread_mutex_lock(&ph->pa->finish_mutex);
 	pthread_mutex_lock(&ph->pa->time_eat_mutex);
-	if (!check_death(ph, 0) && !ph->finish && ((actual_time()) - ph->ms_eat) \
-		< ph->pa->time_to_die)
+	pthread_mutex_lock(&ph->pa->finish_mutex);
+	if (!check_death(ph, 0) && !ph->finish && ((actual_time() - ph->ms_eat) \
+		>= (long)(ph->pa->time_to_die)))
 	{
-		pthread_mutex_unlock(&ph->pa->finish_mutex);
 		pthread_mutex_unlock(&ph->pa->time_eat_mutex);
+		pthread_mutex_unlock(&ph->pa->finish_mutex);
 		pthread_mutex_lock(&ph->pa->write_mutex);
-		print_action("died\n", ph);
+		print_status("died\n", ph);
 		pthread_mutex_unlock(&ph->pa->write_mutex);
 		check_death(ph, 1);
 	}
-	pthread_mutex_unlock(&ph->pa->finish_mutex);
 	pthread_mutex_unlock(&ph->pa->time_eat_mutex);
+	pthread_mutex_unlock(&ph->pa->finish_mutex);
+	return (NULL);
 }
+
+/*
+	Thread function that simulates the behavior of a philosopher.
+	It creates a new thread to check whether the philosopher has
+	died, and then performs the philosopher's actions.
+	Keeps track of how many times the philosopher has eaten.
+*/
 
 void	*thread(void *data)
 {
-	t_philo	*ph;
+	t_philo					*ph;
 
 	ph = (t_philo *)data;
 	if (ph->id % 2 == 0)
@@ -44,10 +57,10 @@ void	*thread(void *data)
 	while (!check_death(ph, 0))
 	{
 		pthread_create(&ph->thread_death_id, NULL, is_dead, data);
-		simu(ph);
-		if((int)++ph->nb_philo_ate == ph->pa->meals)
+		simulation(ph);
+		if ((int)++ph->nb_philo_ate == ph->pa->meals)
 		{
-			phtread_mutex_lock(ph->pa->finish_mutex);
+			pthread_mutex_lock(&ph->pa->finish_mutex);
 			ph->finish = 1;
 			ph->pa->number_philos_ate++;
 			if (ph->pa->number_philos_ate == ph->pa->philos)
@@ -56,27 +69,27 @@ void	*thread(void *data)
 				check_death(ph, 2);
 			}
 			pthread_mutex_unlock(&ph->pa->finish_mutex);
+			return (NULL);
 		}
 	}
+	pthread_join(ph->thread_death_id, NULL);
+	return (NULL);
 }
 
 /*
 	Creates a thread for each philosopher.
 */
 
-int	thread_philo(t_p *p)
+int	threading(t_p *p)
 {
 	int	i;
 
 	i = 0;
-	while (i < p->s.philos)
+	while (i < p->a.philos)
 	{
-		p->ph[i].pa = &p->s;
-		if (pthread_create(&p->ph[i].thread_id, NULL, thread, &p->ph[i]) != 0);
-		{
-			printf("Error! Pthread did not return 0\n");
-			return (0);
-		}
+		p->ph[i].pa = &p->a;
+		if (pthread_create(&p->ph[i].thread_id, NULL, thread, &p->ph[i]) != 0)
+			return (ft_exit("Pthread did not return 0\n"));
 		i++;
 	}
 	return (1);

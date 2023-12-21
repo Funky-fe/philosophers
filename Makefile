@@ -1,43 +1,67 @@
-# Variáveis
+# BASIC
+CC = cc -g -pthread
+CFLAGS = -Wall -Wextra -Werror
+RM = rm -rf
+GDB = gdb
 
-NAME		= philo
-CC			= cc
-CFLAGS		= -g -pthread -Wall -Werror -Wextra -fsanitize=thread
-RM			= rm -f
+# TESTING
+VAL = valgrind --leak-check=full --track-origin=yes
+SANITIZE_THREAD = -fsanitize=thread
+SANITIZE_ADDRESS = -fsanitize=address
+HELGRIND = valgrind --tool=helgrind
+DRD = valgrind --tool=drd
 
-# Cores
+# COLORS
+RESET			:= \033[0m
+GREEN			=	\e[32m
+CYAN			:= \33[1;36m
+YELLOW			=	\e[033m
+BLUE			=	\e[34m
+WHITE			=	\e[00m
+RED				:= \033[1;31m
+BOLD			:= \033[1;1m
 
-DEFAULT = \033[0;39m
-GRAY = \033[0;90m
-RED = \033[0;91m
-GREEN = \033[0;92m
-YELLOW = \033[0;93m
-BLUE = \033[0;94m
-MAGENTA = \033[0;95m
-CYAN = \033[0;96m
-WHITE = \033[0;97m
+# PHILOSOPHERS
+NAME =	philo.a
+SRCS =  args.c \
+        check.c \
+		init.c \
+		main.c \
+		actions.c \
+		threads.c \
+		utils.c \
 
-#Sources
+OBJSDIR = objects
+OBJS = $(addprefix $(OBJSDIR)/,$(SRCS:.c=.o))
 
-SRC_FILES	=	main init utils utils2
+# MAKE RULES
+all: $(NAME) philo
 
-all: $(NAME) 
+$(NAME): $(OBJS)
+	@echo "$(GREEN)$(BOLD)Creating objects directory...$(RESET)"
+	ar -rcs $(NAME) $(OBJS)
+	@echo "$(GREEN)$(BOLD)Objects created!$(RESET)"
+	
+$(OBJSDIR)/%.o: %.c
+	mkdir -p $(@D)
+	$(CC) $(CFLAGS) -c $< -o $@
 
-$(NAME):
-	@echo "$(YELLOW)Compiling..."
-	@$(CC) -c $(CFLAGS) $(SRC_FILES:=.c)
-	@$(CC) $(CFLAGS) $(SRC_FILES:=.o) -o $(NAME)
-	@echo "$(GREEN)Philosophers compilled!$(DEFAULT)"
+philo: $(PHILO_OBJ) $(NAME)
+	@echo "$(GREEN)$(BOLD)Creating executable...$(RESET)"
+	$(CC) $(CFLAGS) $(PHILO_OBJ) $(NAME) -o philo
+	@echo "$(GREEN)$(BOLD)Executable created!$(RESET)"
 
 clean:
-	@echo "$(RED)Deleted .o files"
-	@$(RM) $(SRC_FILES:=.o)
+	@echo "$(YELLOW)$(BOLD)Removing objects...$(RESET)"
+	$(RM) $(OBJSDIR)
+	@echo "$(YELLOW)$(BOLD)Objects removed!$(RESET)"
 
-fclean:	clean
-	@$(RM) -f $(NAME)
-	@echo "$(RED)Deleted Philo"
+fclean: clean
+	@echo "$(RED)$(BOLD)Removing executable...$(RESET)"
+	$(RM) philo philo.a
+	@echo "$(RED)$(BOLD)Executable removed!$(RESET)"
 
-re:			fclean all
-			@echo "$(BLUE)Code cleaned and rebuilt$(DEFAULT)"
+re: fclean all
+	@echo "$(GREEN)$(BOLD)Recompiled successfully!$(RESET)"
 
-.PHONY: all clean fclean re
+.SILENT:

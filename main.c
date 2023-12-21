@@ -5,30 +5,27 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: rlima-fe <rlima-fe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/12/08 17:14:12 by rlima-fe          #+#    #+#             */
-/*   Updated: 2023/12/18 13:23:42 by rlima-fe         ###   ########.fr       */
+/*   Created: 2023/12/21 16:02:37 by rlima-fe          #+#    #+#             */
+/*   Updated: 2023/12/21 16:03:09 by rlima-fe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-int	main(int ac, char **av)
+int	main(int argc, char **argv)
 {
-	t_p	philo;
+	t_p		p;
 
-	if (!(arg_checker(ac, av, &philo)))
-		arg_error();
-	philo.ph = malloc(sizeof(t_philo) * philo.s.philos);
-	if (!philo.ph)
+	if (!(args(argc, argv, &p)))
+		return (ft_exit("Invalid Arguments\n"));
+	p.ph = malloc(sizeof(t_philo) * p.a.philos);
+	if (!p.ph)
+		return (ft_exit("Malloc returned NULL\n"));
+	if (!initialize(&p) || !threading(&p))
 	{
-		printf("Malloc error\n");
+		free(p.ph);
 		return (0);
 	}
-	if (!init(&philo))
-	{
-		free(philo.ph);
-		return (0);
-	}
-	stop(&philo);
+	stop(&p);
 	return (0);
 }
