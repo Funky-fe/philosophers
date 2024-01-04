@@ -6,7 +6,7 @@
 /*   By: rlima-fe <rlima-fe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/21 16:15:48 by rlima-fe          #+#    #+#             */
-/*   Updated: 2024/01/04 14:09:40 by rlima-fe         ###   ########.fr       */
+/*   Updated: 2024/01/04 16:23:07 by rlima-fe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ void	print_status(char *str, t_philo *ph)
 {
 	long int		time;
 
+	time = -1;
 	time = actual_time() - ph->pa->start_t;
 	if (time >= 0 && time <= 2147483647 && !check_death(ph, 0))
 	{
@@ -76,9 +77,6 @@ void	simulation(t_philo *ph)
 	pthread_mutex_unlock(&ph->pa->write_mutex);
 	ft_usleep(ph->pa->time_to_eat);
 	pthread_mutex_unlock(ph->right_fork);
-	pthread_mutex_lock(&ph->pa->time_eat_mutex);
-	ph->ms_eat = actual_time();
-	pthread_mutex_unlock(&ph->pa->time_eat_mutex);
 	pthread_mutex_unlock(&ph->left_fork);
 	sleep_and_think(ph);
 }

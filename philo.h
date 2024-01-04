@@ -6,7 +6,7 @@
 /*   By: rlima-fe <rlima-fe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/08 17:16:09 by rlima-fe          #+#    #+#             */
-/*   Updated: 2023/12/21 15:49:38 by rlima-fe         ###   ########.fr       */
+/*   Updated: 2024/01/04 14:19:11 by rlima-fe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,5 +98,5 @@ long	int	actual_time(void);
 int		ft_strlen(char *str);
 int		ft_atoi(const char *str);
 int		is_number(char **argv, int i, int j);
-
+void	set_last_eat(t_philo *ph);
 #endif
